@@ -13,10 +13,13 @@ import com.example.shaadidemoapp.R
 import com.example.shaadidemoapp.databinding.ItemUserProfileBinding
 import com.practice.demo.db.ProfileEntity
 import com.practice.demo.profileMatch.MatchProfileContract
+import render.animations.Render
+import render.animations.Slide
 
 class MatchMateAdapter(
     private var profileEntityList: List<ProfileEntity>?,
     private val context: Context,
+    private val renderAnimation: Render,
     private val btnClickListener: BtnClickListener,
 ) : RecyclerView.Adapter<MatchMateAdapter.MatchMateViewHolder>() {
 
@@ -36,7 +39,7 @@ class MatchMateAdapter(
 
     override fun onBindViewHolder(holder: MatchMateViewHolder, position: Int) {
         val item = profileEntityList?.get(position)
-        holder.bindData(item, context, btnClickListener)
+        holder.bindData(item, context, btnClickListener, renderAnimation)
     }
 
     fun updateData(list: List<ProfileEntity>){
@@ -48,7 +51,12 @@ class MatchMateAdapter(
         RecyclerView.ViewHolder(binding.root) {
         var binding: ItemUserProfileBinding = binding
 
-        fun bindData(item: ProfileEntity?, context: Context, btnClickListener: BtnClickListener) {
+        fun bindData(
+            item: ProfileEntity?,
+            context: Context,
+            btnClickListener: BtnClickListener,
+            renderAnimation: Render
+        ) {
 
             val status = item?.interactionStatus
             when(status){
@@ -82,11 +90,20 @@ class MatchMateAdapter(
             binding.btnAccept.setOnClickListener {
                 btnClickListener.onAcceptClicked(uuid = item?.uuid.toString(), status = MatchProfileContract.InteractionStatus.ACCEPTED)
                 Toast.makeText(context, "Accepted", Toast.LENGTH_SHORT).show()
+                startAnimation(renderAnimation)
             }
             binding.btnDecline.setOnClickListener {
                 btnClickListener.onDeclineClicked(uuid = item?.uuid.toString(), status = MatchProfileContract.InteractionStatus.DECLINED)
                 Toast.makeText(context, "Declined", Toast.LENGTH_SHORT).show()
+                startAnimation(renderAnimation)
             }
+        }
+
+        private fun startAnimation(renderAnimation: Render) {
+            renderAnimation.setAnimation(Slide().OutDown(binding.btnAccept))
+            renderAnimation.setAnimation(Slide().OutDown(binding.btnDecline))
+            renderAnimation.setAnimation(Slide().InDown(binding.tvStatus))
+            renderAnimation.start()
         }
     }
 

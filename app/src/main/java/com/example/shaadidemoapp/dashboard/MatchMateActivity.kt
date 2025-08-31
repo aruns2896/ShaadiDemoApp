@@ -12,8 +12,8 @@ import com.example.shaadidemoapp.R
 import com.example.shaadidemoapp.dashboard.viewModel.MatchProfileViewModel
 import com.example.shaadidemoapp.dashboard.viewModel.MatchProfileViewModelFactory
 import com.example.shaadidemoapp.databinding.ActivityMatchMateBinding
-import com.practice.demo.db.ProfileEntity
 import com.practice.demo.profileMatch.MatchProfileContract
+import render.animations.Render
 
 class MatchMateActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMatchMateBinding
@@ -24,18 +24,21 @@ class MatchMateActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_match_mate)
 
         val repository = (application as ApplicationClass).mainRepository
-        val repo = (application as ApplicationClass).repo
 
         matchProfileViewModel =
-            ViewModelProvider(this, MatchProfileViewModelFactory(repository, repo)).get(
+            ViewModelProvider(this, MatchProfileViewModelFactory(repository)).get(
                 MatchProfileViewModel::class.java
             )
 
         binding.rvMatches.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+
+        var render = Render(this)
+
         val adapter = MatchMateAdapter(
             profileEntityList = null,
             context = this@MatchMateActivity,
+            render,
             object : MatchMateAdapter.BtnClickListener {
                 override fun onAcceptClicked(
                     uuid: String,

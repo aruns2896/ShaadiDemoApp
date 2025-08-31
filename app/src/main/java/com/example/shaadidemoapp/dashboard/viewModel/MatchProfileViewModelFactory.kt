@@ -6,10 +6,9 @@ import com.example.shaadidemoapp.network.MainRepository
 import com.practice.demo.db.MatchProfileRepository
 
 class MatchProfileViewModelFactory(
-    private val repository: MainRepository,
-    private val repo: MatchProfileRepository
+    private val repository: MainRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return MatchProfileViewModel(repository, repo) as T
+        return MatchProfileViewModel(repository) as T
     }
 }

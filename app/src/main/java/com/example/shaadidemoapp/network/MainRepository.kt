@@ -1,13 +1,8 @@
 package com.example.shaadidemoapp.network
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.shaadidemoapp.models.response.UserResult
 import com.example.shaadidemoapp.utils.toEntity
-import com.example.shaadidemoapp.utils.toProfileUiState
 import com.practice.demo.db.MatchProfileRepository
 import com.practice.demo.db.ProfileEntity
 import com.practice.demo.profileMatch.MatchProfileContract
@@ -19,7 +14,9 @@ class MainRepository @Inject constructor(
 ) {
 
     private val matchesLiveData = MutableLiveData<List<ProfileEntity>>()
-    var state by mutableStateOf(MatchProfileContract.state())
+
+    private var isError = false
+    private var errorMessage = ""
 
     val matches: LiveData<List<ProfileEntity>>
         get() = matchesLiveData
@@ -28,11 +25,9 @@ class MainRepository @Inject constructor(
         count: Int
     ) {
         try {
-            state = state.copy(isLoading = true)
-
             val response = apiService.getUsers(count = count)
-
             if (response.isSuccessful) {
+                isError = false
                 val apiProfiles = response.body()?.results ?: emptyList()
                 val entities = apiProfiles.map { it.toEntity() }
                 matchesLiveData.postValue(entities)
@@ -40,28 +35,19 @@ class MainRepository @Inject constructor(
                 repo.insertProfiles(entities)
 
             } else {
-                state = state.copy(
-                    error = true,
-                    errorMessage = "Error fetching data: ${response.message()}",
-                    isLoading = false
-                )
+                isError = true
+                errorMessage = "Failed while fetching data: ${response.message()}"
             }
 
         } catch (e: Exception) {
             val cached = repo.getProfilesFromDb()
             if (cached.isNotEmpty()) {
-                state = state.copy(
-                    listOfProfile = cached.map { it.toProfileUiState() },
-                    isLoading = false,
-                    error = false
-                )
+                isError = false
                 matchesLiveData.postValue(cached)
             } else {
-                state = state.copy(
-                    error = true,
-                    errorMessage = "Something went wrong, please try again",
-                    isLoading = false
-                )
+                isError = true;
+                errorMessage =
+                    "No offline data available, please turn on your internet and try again"
             }
         }
     }
@@ -77,13 +63,6 @@ class MainRepository @Inject constructor(
                 it.copy(interactionStatus = status)
             else it
         })
-
-        state = state.copy(
-            listOfProfile = state.listOfProfile.map {
-                if (it.profile.login?.uuid == uuid) it.copy(interactionStatus = status)
-                else it
-            }
-        )
     }
 
 }
