@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">ShaadiDemoApp</string>
+    <string name="app_name">MatchMate</string>
+    <string name="location">Location</string>
+    <string name="accept">Accept</string>
+    <string name="declined">Declined</string>
+    <string name="accepted">Accepted</string>
 </resources>
